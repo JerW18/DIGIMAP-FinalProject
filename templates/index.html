@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing</title>
+</head>
+<body>
+    <h1>Image Processing</h1>
+    <form id="uploadForm" enctype="multipart/form-data" method="post" action="/process_image">
+        <input type="file" name="image" accept="image/*">
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            fetch('/process_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                var imgUrl = URL.createObjectURL(blob);
+                var imgElement = document.createElement('img');
+                imgElement.src = imgUrl;
+                
+                // Append the image element to the result div
+                var resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '';
+                resultDiv.appendChild(imgElement);
+            })
+            .catch(error => {
+                console.error('There was an error with the fetch operation:', error);
+            });
+        });
+    </script>
+</body>
+</html>
