@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, send_file
 import cv2
 import numpy as np
 import io
+import psutil
 
 app = Flask(__name__)
 
@@ -30,8 +31,16 @@ def resize_to_1080p(image):
 
     return image
 
+def get_memory_usage():
+    process = psutil.Process()
+    mem_usage = process.memory_info().rss  # Get memory usage in bytes
+    return mem_usage / (1024 ** 2)  # Convert to megabytes (MB)
+
 @app.route('/process_image', methods=['POST'])
 def process_image():
+    # Get memory usage before image processing
+    initial_memory = get_memory_usage()
+
     # Load the image from the request
     file = request.files['image']
     if file:
@@ -53,6 +62,14 @@ def process_image():
 
         # Encode the image data to a binary format
         img_bytes = cv2.imencode('.jpg', hed)[1].tobytes()
+
+        # Get memory usage after image processing
+        final_memory = get_memory_usage()
+
+        memory_used = max(final_memory - initial_memory, 0)
+
+        # Log memory usage (you can log it to a file, database, or print it)
+        print(f"Memory used during image processing: {memory_used:.2f} MB")
 
         # Return the image data as a binary response
         return send_file(io.BytesIO(img_bytes),
