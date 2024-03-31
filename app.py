@@ -5,6 +5,10 @@ import io
 
 app = Flask(__name__)
 
+@app.route("/")
+def run_app():
+    return render_template('index.html')
+
 protoPath = "models\deploy.prototxt"
 modelPath = "models\hed_pretrained_bsds.caffemodel"
 net = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
@@ -61,7 +65,3 @@ def process_image():
 
     else:
         return "No image file provided"
-
-@app.route("/")
-def hello_world():
-    return render_template('index.html')
