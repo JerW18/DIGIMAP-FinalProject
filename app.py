@@ -5,10 +5,6 @@ import io
 
 app = Flask(__name__)
 
-@app.route("/")
-def run_app():
-    return render_template('index.html')
-
 protoPath = "models\deploy.prototxt"
 modelPath = "models\hed_pretrained_bsds.caffemodel"
 net = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
@@ -59,9 +55,11 @@ def process_image():
         img_bytes = cv2.imencode('.jpg', hed)[1].tobytes()
 
         # Return the image data as a binary response
-        return send_file(io.BytesIO(img_bytes),
-                         mimetype='image/jpeg',
-                         as_attachment=False)
+        return send_file(io.BytesIO(img_bytes), mimetype='image/jpeg', as_attachment=False)
 
     else:
         return "No image file provided"
+    
+@app.route("/")
+def run_app():
+    return render_template('index.html')
