@@ -5,8 +5,8 @@ import io
 
 app = Flask(__name__)
 
-protoPath = "models\deploy.prototxt"
-modelPath = "models\hed_pretrained_bsds.caffemodel"
+protoPath = "models/deploy.prototxt"
+modelPath = "models/hed_pretrained_bsds.caffemodel"
 net = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
 
 def resize_to_1080p(image):
