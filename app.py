@@ -1,3 +1,6 @@
+import os
+os.environ['OPENCV_VIDEOIO_PRIORITY_MSMF'] = '0'
+
 from flask import Flask, render_template, request, send_file
 import cv2
 import numpy as np
