@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, send_file
 import cv2
 import numpy as np
 import io
+import os
 
 app = Flask(__name__)
 
@@ -36,29 +37,34 @@ def process_image():
     file = request.files['image']
     if file:
         # Read the image file
-        nparr = np.fromstring(file.read(), np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        file_extension = os.path.splitext(file.filename)[1].lower()
+        if file_extension in ['.jpg', '.jpeg', '.png']:
+            image_bytes = file.read()
+            nparr = np.frombuffer(image_bytes, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        # Resize the image to 1080p if needed
-        img = resize_to_1080p(img)
+            # Resize the image to 1080p if needed
+            img = resize_to_1080p(img)
 
-        # Perform image processing
-        (H, W) = img.shape[:2]
-        mean_pixel_values= np.average(img, axis=(0,1))
-        blob = cv2.dnn.blobFromImage(img, scalefactor=0.7, size=(W, H), mean=(mean_pixel_values[0], mean_pixel_values[1], mean_pixel_values[2]))
-        net.setInput(blob)
-        hed = net.forward()
-        hed = hed[0,0,:,:]  # Drop the other axes
-        hed = (255 * hed).astype("uint8")  # Rescale to 0-255
+            # Perform image processing
+            (H, W) = img.shape[:2]
+            mean_pixel_values = np.average(img, axis=(0,1))
+            blob = cv2.dnn.blobFromImage(img, scalefactor=0.7, size=(W, H), mean=(mean_pixel_values[0], mean_pixel_values[1], mean_pixel_values[2]))
+            net.setInput(blob)
+            hed = net.forward()
+            hed = hed[0,0,:,:]  # Drop the other axes
+            hed = (255 * hed).astype("uint8")  # Rescale to 0-255
 
-        # Encode the image data to a binary format
-        img_bytes = cv2.imencode('.jpg', hed)[1].tobytes()
+            # Encode the image data to a binary format
+            img_bytes = cv2.imencode('.jpg', hed)[1].tobytes()
 
-        # Return the image data as a binary response
-        return send_file(io.BytesIO(img_bytes), mimetype='image/jpeg', as_attachment=False)
-
+            # Return the image data as a binary response
+            return send_file(io.BytesIO(img_bytes), mimetype='image/jpeg', as_attachment=False)
+        else:
+            return "Unsupported file format. Please upload a JPG, JPEG, PNG, BMP, or GIF image."
     else:
         return "No image file provided"
+
     
 @app.route("/")
 def run_app():

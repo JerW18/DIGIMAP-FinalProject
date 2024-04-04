@@ -3,21 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Processing</title>
+    <title>HED Image Processing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .body {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            justify-content: center;
+            display: inline-flex;
+            flex-direction: column;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            display: block;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #fileTypesText {
+            font-size: 12px; 
+            color: #777; 
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+        }
+        .img-container {
+            display: flex;
+            width: 360px;
+            height: 360px;
+            border: 1px solid black;
+            margin: 20px;
+            justify-content: center;
+            align-items: center; 
+            border-radius: 10px;
+            position: relative;
+        }
+        img {
+            max-width: 95%;
+            max-height: 95%;
+            margin: auto;
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            position: absolute; 
+            top: 45%; 
+            left: 45%; 
+            transform: translate(-50%, -50%);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .form-container{
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Image Processing</h1>
-    <form id="uploadForm" enctype="multipart/form-data" method="post" action="/process_image">
-        <input type="file" name="image" accept="image/*">
-        <button type="submit">Upload Image</button>
-    </form>
-
-    <div id="result"></div>
-
+    <div class="body">
+        <h1>Holistically-Nested Edge Detection Image Processing</h1>
+        
+        <form class="form-container" id="uploadForm" enctype="multipart/form-data" method="post" action="/process_image">
+            <input type="file" name="image" accept="image/*">
+            <div id="fileTypesText">(Supported file types: JPG, JPEG, PNG)</div>
+            <button type="submit">Upload Image</button>
+        </form>
+        
+        <div class="container">
+            <div class="img-container" id="original">
+            
+            </div>
+    
+            <div class="img-container" id="result">
+                
+            </div>
+        </div>
+    </div>
+    
     <script>
+        window.onload = function() {
+            document.getElementById('uploadForm').reset();
+        };
+
+        document.getElementById('uploadForm').addEventListener('change', function(event) {
+            var fileInput = event.target;
+            var file = fileInput.files[0];
+            if (file) {
+                var imgElement = document.createElement('img');
+                imgElement.src = URL.createObjectURL(file);
+                var originalDiv = document.getElementById('original');
+                originalDiv.innerHTML = '';
+                originalDiv.appendChild(imgElement);
+
+                var resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '';
+            }
+        });
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
             var formData = new FormData(this);
+            
+            // Create loading spinner element
+            var loadingSpinner = document.createElement('div');
+            loadingSpinner.innerHTML = '<div class="loader"></div>'; // Add your loading spinner image here
+            
+            // Append loading spinner to the result div
+            var resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+            resultDiv.appendChild(loadingSpinner);
+
             fetch('/process_image', {
                 method: 'POST',
                 body: formData
@@ -34,12 +159,12 @@
                 imgElement.src = imgUrl;
                 
                 // Append the image element to the result div
-                var resultDiv = document.getElementById('result');
                 resultDiv.innerHTML = '';
                 resultDiv.appendChild(imgElement);
             })
             .catch(error => {
                 console.error('There was an error with the fetch operation:', error);
+                resultDiv.innerHTML = ''; // Clear the result div
             });
         });
     </script>
