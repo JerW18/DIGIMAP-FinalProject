@@ -61,7 +61,7 @@ def process_image():
             # Return the image data as a binary response
             return send_file(io.BytesIO(img_bytes), mimetype='image/jpeg', as_attachment=False)
         else:
-            return "Unsupported file format. Please upload a JPG, JPEG, PNG, BMP, or GIF image."
+            return "Unsupported file format. Please upload a JPG, JPEG, or PNG image."
     else:
         return "No image file provided"
 
